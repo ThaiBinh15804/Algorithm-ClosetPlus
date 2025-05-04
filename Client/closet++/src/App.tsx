@@ -75,9 +75,7 @@ function App() {
               setResponseResult={setResponseResult}
             />
           )}
-          {typeInput === "file" && (
-            <InputFile file={file} setFile={setFile} setResponseResult={setResponseResult} />
-          )}
+          {typeInput === "file" && <InputFile file={file} setFile={setFile} setResponseResult={setResponseResult} />}
         </section>
 
         {responseResult && (
@@ -88,9 +86,7 @@ function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
               {/* Frequent Itemsets */}
               <div className="bg-gradient-to-br from-purple-100 via-yellow-50 to-orange-100 p-8 rounded-2xl shadow-xl border-2 border-purple-200">
-                <h3 className="text-2xl font-bold mb-6 text-purple-700 flex items-center gap-2">
-                  Tập hợp phổ biến
-                </h3>
+                <h3 className="text-2xl font-bold mb-6 text-purple-700 flex items-center gap-2">Tập hợp phổ biến</h3>
                 <div className="space-y-3">
                   {responseResult &&
                     responseResult.frequent_itemsets.map((item, index) => (
@@ -106,6 +102,7 @@ function App() {
                     ))}
                 </div>
               </div>
+
               {/* Closed Itemsets */}
               <div className="bg-gradient-to-br from-orange-100 via-yellow-50 to-purple-100 p-8 rounded-2xl shadow-xl border-2 border-orange-200">
                 <h3 className="text-2xl font-bold mb-6 text-orange-700 flex items-center gap-2">
@@ -130,19 +127,17 @@ function App() {
 
             {/* Association Rules */}
             <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-pink-300 space-y-4 mb-10">
-                <h3 className="text-2xl font-bold mb-4 text-pink-700">Luật kết hợp</h3>
-                <ul className="space-y-2">
-                  {responseResult &&
-                    responseResult.association_rules.map((item) => (
-                      <li key={item.rule} className="flex items-center gap-2">
-                        <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
-                        <span className="text-gray-700">{item.rule}</span>
-                      </li>
-                    ))}
-                </ul>
-              </div>
-
-              
+              <h3 className="text-2xl font-bold mb-4 text-pink-700">Luật kết hợp</h3>
+              <ul className="space-y-2">
+                {responseResult &&
+                  responseResult.association_rules.map((item) => (
+                    <li key={item.rule} className="flex items-center gap-2">
+                      <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
+                      <span className="text-gray-700">{item.rule}</span>
+                    </li>
+                  ))}
+              </ul>
+            </div>
 
             <div className="space-y-8">
               {/* f_list */}
@@ -164,7 +159,9 @@ function App() {
               {/* FP-tree Visualization */}
               <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-orange-300">
                 <h3 className="text-2xl font-bold mb-4 text-orange-700">Cây FP-tree</h3>
-                {responseResult && <TreeNode node={responseResult.fp_tree.root} />}
+                <div className="w-full min-w-0">
+                  {responseResult && <TreeNode node={responseResult.fp_tree.root} />}
+                </div>
               </div>
 
               {/* Header Table */}
@@ -222,8 +219,6 @@ function App() {
                   )}
                 </div>
               </div>
-
-              
             </div>
           </section>
         )}

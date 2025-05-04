@@ -32,87 +32,99 @@ function getRandomColor() {
 }
 
 export default function TreeNode({ node }: { node: FPNode }) {
-  const hasOneChild = node.children && node.children.length === 1
+  const NODE_SIZE = 60
+  const H_GAP = 100
+  const V_GAP = 20
+
+  // Tính tổng chiều rộng các node con để căn giữa
+  const totalWidth =
+    node.children && node.children.length > 0
+      ? node.children.length * NODE_SIZE + (node.children.length - 1) * H_GAP
+      : 0
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
-      {/* Node chính */}
-      <div style={{ position: "relative", padding: 10 }}>
-        {/* Đường nối từ cha xuống con */}
+    <div style={{ width: "100%" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
+        {/* Node chính */}
+        <div style={{ position: "relative", padding: 10 }}>
+          <div
+            style={{
+              width: NODE_SIZE,
+              height: NODE_SIZE,
+              borderRadius: "50%",
+              backgroundColor: colorPalette[getRandomColor()],
+              color: "white",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              fontWeight: "bold"
+            }}
+          >
+            {node.count === 0 ? "Root" : node.item + ":" + node.count}
+          </div>
+        </div>
+
+        {/* Các node con */}
         {node.children?.length > 0 && (
           <div
             style={{
-              position: "absolute",
-              top: "100%",
-              left: "50%",
-              width: 2,
-              height: 20,
-              backgroundColor: "#000",
-              transform: "translateX(-50%)"
+              width: totalWidth,
+              marginTop: 0,
+              position: "relative",
+              minHeight: V_GAP + NODE_SIZE // Đảm bảo đủ chỗ cho SVG và node con
             }}
-          />
-        )}
-
-        <div
-          style={{
-            width: 60,
-            height: 60,
-            borderRadius: "50%",
-            backgroundColor: colorPalette[getRandomColor()],
-            color: "white",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontWeight: "bold"
-          }}
-        >
-          {node.count === 0 ? "Root" : node.item + ":" + node.count}
-        </div>
-      </div>
-
-      {/* Các node con nằm theo hàng ngang */}
-      {node.children?.length > 0 && (
-        <div style={{ display: "flex", justifyContent: "center", marginTop: 20, position: "relative" }}>
-          {/* Đường ngang kết nối các node con */}
-          {!hasOneChild && (
-            <div
+          >
+            {/* SVG vẽ các đường nối */}
+            <svg
+              width={totalWidth}
+              height={V_GAP}
               style={{
-                position: "absolute",
+                display: "block",
+                margin: "0 auto",
+                pointerEvents: "none",
+                zIndex: 1,
+                position: "relative", // Đổi từ absolute sang relative
                 top: 0,
-                left: 0,
-                right: 0,
-                height: 1,
-                width: "100%",
-                backgroundColor: "#000"
-              }}
-            />
-          )}
-
-          {/* Hiển thị từng node con */}
-          {node.children.map((child, index) => (
-            <div
-              key={index}
-              style={{
-                position: "relative",
-                padding: "0 20px"
+                left: 0
               }}
             >
-              {/* Đường nối dọc từ đường ngang xuống con */}
-              <div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: "50%",
-                  width: 2,
-                  height: 20,
-                  backgroundColor: "#000",
-                  transform: "translateX(-50%)"
-                }}
-              />
-              <TreeNode node={child} />
+              {node.children.map((_, idx) => {
+                const xChild = idx * (NODE_SIZE + H_GAP) + NODE_SIZE / 2
+                const xParent = totalWidth / 2
+                return (
+                  <line
+                    key={idx}
+                    x1={xParent}
+                    y1={0}
+                    x2={xChild}
+                    y2={V_GAP}
+                    stroke="#000"
+                    strokeWidth={2}
+                  />
+                )
+              })}
+            </svg>
+            {/* Hiển thị từng node con */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "flex-start",
+                width: "100%",
+                marginTop: 0,
+                zIndex: 2,
+                position: "relative"
+              }}
+            >
+              {node.children.map((child, idx) => (
+                <div key={idx} style={{ width: NODE_SIZE, marginRight: idx < node.children.length - 1 ? H_GAP : 0 }}>
+                  <TreeNode node={child} />
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }

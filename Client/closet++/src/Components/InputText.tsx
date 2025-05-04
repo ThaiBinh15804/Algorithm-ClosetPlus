@@ -28,44 +28,27 @@ export default function InputText({ listTransaction, setListTransaction, setResp
     (data) => {
       const n = Number(data.numberTransaction)
       const arr = Array.from({ length: n }, (_, i) => i + 1)
-      const listTrans = arr.map((item) => {
-        const res = {
-          id: "T" + item,
-          listItem: ""
-        }
-        return res
-      })
+      const listTrans = arr.map((item) => ({
+        id: "T" + item,
+        listItem: ""
+      }))
       setInputMinSup(parseFloat(data.min_sup))
       setInputMinConfidence(parseFloat(data.min_confidence))
       setInputMinLift(parseFloat(data.min_lift))
       setListTransaction(listTrans)
     },
     (errors) => {
-      if (errors.numberTransaction) {
-        toast.error(errors.numberTransaction.message, { autoClose: 1500 })
-      }
-      if (errors.min_sup) {
-        toast.error(errors.min_sup.message, { autoClose: 1500 })
-      }
-      if (errors.min_confidence) {
-        toast.error(errors.min_confidence.message, { autoClose: 1500 })
-      }
-      if (errors.min_lift) {
-        toast.error(errors.min_lift.message, { autoClose: 1500 })
-      }
+      if (errors.numberTransaction) toast.error(errors.numberTransaction.message, { autoClose: 1500 })
+      if (errors.min_sup) toast.error(errors.min_sup.message, { autoClose: 1500 })
+      if (errors.min_confidence) toast.error(errors.min_confidence.message, { autoClose: 1500 })
+      if (errors.min_lift) toast.error(errors.min_lift.message, { autoClose: 1500 })
     }
   )
 
   const handleChangeList = (idTransaction: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-    const updatedList = listTransaction.map((item) => {
-      if (item.id === idTransaction) {
-        return {
-          ...item,
-          listItem: event.target.value
-        }
-      }
-      return item
-    })
+    const updatedList = listTransaction.map((item) =>
+      item.id === idTransaction ? { ...item, listItem: event.target.value } : item
+    )
     setListTransaction(updatedList)
   }
 
@@ -84,12 +67,11 @@ export default function InputText({ listTransaction, setListTransaction, setResp
   const { handleSubmit: handleSubmitRunCloset } = useForm<FormDataRun>()
   const handleSubmitRunClosetPlus = handleSubmitRunCloset(async () => {
     const getItemFromTransaction = listTransaction.map((item) => {
-      const normalizedString = item.listItem.trim().replace(/\s*,\s*/g, ",") // Thay thế dấu phẩy (có hoặc không có khoảng trắng) bằng dấu phẩy chuẩn
-
+      const normalizedString = item.listItem.trim().replace(/\s*,\s*/g, ",")
       const splitItem = normalizedString
-        .split(",") // Tách bằng dấu phẩy
-        .map((i) => i.trim()) // Loại bỏ khoảng trắng thừa ở mỗi item
-        .filter((i) => i !== "") // Loại bỏ các phần tử rỗng
+        .split(",")
+        .map((i) => i.trim())
+        .filter((i) => i !== "")
       return splitItem
     })
     const body = {
@@ -106,7 +88,6 @@ export default function InputText({ listTransaction, setListTransaction, setResp
         }
       })
       setResponseResult(res.data as MiningResult)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error(error)
     }
@@ -114,94 +95,103 @@ export default function InputText({ listTransaction, setListTransaction, setResp
 
   return (
     <div className="mt-4">
-      <form onSubmit={handleSubmitForm}>
-        <div className="flex items-center justify-between w-[500px]">
-          <span className="text-[14px]">Số lượng giao dịch:</span>
-          <input
-            placeholder="Nhập số giao dịch"
-            className="p-2 border border-gray-300 rounded-md min-w-[300px] text-[14px]"
-            {...register("numberTransaction")}
-          />
-        </div>
-        <div className="mt-2 flex items-center justify-between w-[500px]">
-          <span className="text-[14px]">Ngưỡng hỗ trợ tối thiểu:</span>
-          <input
-            placeholder="Nhập ngưỡng hỗ trợ tối thiểu"
-            className="p-2 border border-gray-300 rounded-md min-w-[300px] text-[14px]"
-            {...register("min_sup")}
-          />
-        </div>
-        <div className="mt-2 flex items-center justify-between w-[500px]">
-          <span className="text-[14px]">Ngưỡng độ tin cậy tối thiểu:</span>
-          <input
-            placeholder="Nhập ngưỡng độ tin cậy tối thiểu"
-            className="p-2 border border-gray-300 rounded-md min-w-[300px] text-[14px]"
-            {...register("min_confidence")}
-          />
-        </div>
-        <div className="mt-2 flex items-center justify-between w-[500px]">
-          <span className="text-[14px]">Ngưỡng độ nâng tối thiểu:</span>
-          <input
-            placeholder="Nhập ngưỡng độ tin cậy tối thiểu"
-            className="p-2 border border-gray-300 rounded-md min-w-[300px] text-[14px]"
-            {...register("min_lift")}
-          />
+      {/* Card nhập tham số */}
+      <form onSubmit={handleSubmitForm} className="bg-white rounded-xl shadow-md p-6 max-w-xl mx-auto mb-6">
+        <div className="grid grid-cols-1 gap-4">
+          <div className="flex items-center justify-between">
+            <span className="text-[15px] font-medium">Số lượng giao dịch:</span>
+            <input
+              placeholder="Nhập số giao dịch"
+              className="p-2 border border-gray-300 rounded-md min-w-[220px] text-[14px] focus:ring-2 focus:ring-blue-200"
+              {...register("numberTransaction")}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[15px] font-medium">Ngưỡng hỗ trợ tối thiểu:</span>
+            <input
+              placeholder="Nhập ngưỡng hỗ trợ tối thiểu"
+              className="p-2 border border-gray-300 rounded-md min-w-[220px] text-[14px] focus:ring-2 focus:ring-blue-200"
+              {...register("min_sup")}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[15px] font-medium">Ngưỡng độ tin cậy tối thiểu:</span>
+            <input
+              placeholder="Nhập ngưỡng độ tin cậy tối thiểu"
+              className="p-2 border border-gray-300 rounded-md min-w-[220px] text-[14px] focus:ring-2 focus:ring-blue-200"
+              {...register("min_confidence")}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-[15px] font-medium">Ngưỡng độ nâng tối thiểu:</span>
+            <input
+              placeholder="Nhập ngưỡng độ nâng tối thiểu"
+              className="p-2 border border-gray-300 rounded-md min-w-[220px] text-[14px] focus:ring-2 focus:ring-blue-200"
+              {...register("min_lift")}
+            />
+          </div>
         </div>
         <button
           type="submit"
-          className="mt-2 py-2 px-4 bg-blue-500 rounded-md text-sm text-white hover:bg-blue-400 duration-300"
+          className="mt-5 w-full py-2 px-4 bg-blue-500 rounded-md text-sm text-white hover:bg-blue-400 duration-300 font-semibold"
         >
           Tạo giao dịch
         </button>
       </form>
 
+      {/* Bảng nhập giao dịch */}
       {listTransaction.length > 0 && (
-        <div>
-          <form onSubmit={handleSubmitRunClosetPlus} className="mt-4">
-            <table style={{ border: "1px solid black", borderCollapse: "collapse" }} cellSpacing="0" cellPadding="4">
-              <thead>
-                <tr>
-                  <th style={{ border: "1px solid black" }}>TID (ID giao dịch)</th>
-                  <th style={{ border: "1px solid black" }}>Danh sách</th>
-                </tr>
-              </thead>
-              <tbody>
-                {listTransaction.map((transaction) => {
-                  return (
-                    <tr key={transaction.id}>
-                      <td style={{ border: "1px solid black" }}>{transaction.id}</td>
-                      <td style={{ border: "1px solid black", width: "250px" }}>
+        <div className="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto">
+          <form onSubmit={handleSubmitRunClosetPlus}>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-lg font-bold text-blue-700">Danh sách giao dịch</span>
+              <button
+                type="button"
+                className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 text-sm"
+                onClick={handleAddTransaction}
+              >
+                <Plus size={16} /> Thêm giao dịch
+              </button>
+            </div>
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <table className="min-w-full bg-white">
+                <thead>
+                  <tr className="bg-blue-50">
+                    <th className="py-2 px-4 text-left text-sm font-semibold text-blue-700">TID</th>
+                    <th className="py-2 px-4 text-left text-sm font-semibold text-blue-700">Danh sách</th>
+                    <th className="py-2 px-4"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {listTransaction.map((transaction) => (
+                    <tr key={transaction.id} className="border-t border-gray-100">
+                      <td className="py-2 px-4 font-medium">{transaction.id}</td>
+                      <td className="py-2 px-4">
                         <input
                           type="text"
                           value={transaction.listItem}
                           onChange={handleChangeList(transaction.id)}
-                          className="px-2 py-1 w-full outline-none bg-[#f2f2f2]"
+                          className="px-2 py-1 w-full outline-none bg-gray-50 rounded border border-gray-200 focus:ring-2 focus:ring-blue-200"
+                          placeholder="a,b,c,..."
                         />
                       </td>
-                      <td style={{ border: "1px solid black" }}>
+                      <td className="py-2 px-4">
                         <button
-                          className="p-1 bg-red-100 rounded-full"
+                          type="button"
+                          className="p-1 bg-red-100 rounded-full hover:bg-red-200"
                           onClick={() => handleDeleteItem(transaction.id)}
                         >
-                          <Trash size={14} color="red" />
+                          <Trash size={16} color="red" />
                         </button>
                       </td>
                     </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-            <button
-              className="text-blue-500 text-right w-[410px] flex items-center justify-end hover:text-blue-400 duration-200 text-[14px] mt-1"
-              onClick={handleAddTransaction}
-            >
-              <Plus size={14} />
-              Thêm giao dịch
-            </button>
-
+                  ))}
+                </tbody>
+              </table>
+            </div>
             <button
               type="submit"
-              className="mt-4 block px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-400 duration-200"
+              className="mt-5 w-full py-2 px-4 rounded-md bg-blue-500 text-white hover:bg-blue-400 duration-200 font-semibold"
             >
               Chạy thuật toán
             </button>
