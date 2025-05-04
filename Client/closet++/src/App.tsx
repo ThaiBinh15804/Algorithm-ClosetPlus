@@ -2,7 +2,7 @@ import { Pencil } from "lucide-react"
 import { useState } from "react"
 import { TypeSchemaFormDataRun } from "./rule"
 import { ToastContainer } from "react-toastify"
-import { MiningResult, TransactionType } from "./type"
+import { MiningResult, TransactionType, ExcelData } from "./type"
 import TreeNode from "./Components/Fptree"
 import InputText from "./Components/InputText"
 import InputFile from "./Components/InputFile"
@@ -15,6 +15,7 @@ function App() {
   const [listTransaction, setListTransaction] = useState<TransactionType[]>([])
   const [responseResult, setResponseResult] = useState<MiningResult | null>(null)
   const [file, setFile] = useState<File | null>(null)
+  const [excelData, setExcelData] = useState<ExcelData | null>(null)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f8fafc] via-[#f3e8ff] to-[#fff7ed] font-sans">
@@ -75,7 +76,15 @@ function App() {
               setResponseResult={setResponseResult}
             />
           )}
-          {typeInput === "file" && <InputFile file={file} setFile={setFile} setResponseResult={setResponseResult} />}
+          {typeInput === "file" && (
+            <InputFile
+              file={file}
+              setFile={setFile}
+              setResponseResult={setResponseResult}
+              excelData={excelData}
+              setExcelData={setExcelData}
+            />
+          )}
         </section>
 
         {responseResult && (
@@ -126,17 +135,22 @@ function App() {
             </div>
 
             {/* Association Rules */}
-            <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-pink-300 space-y-4 mb-10">
-              <h3 className="text-2xl font-bold mb-4 text-pink-700">Luật kết hợp</h3>
-              <ul className="space-y-2">
+            <div className="bg-gradient-to-br from-pink-100 via-yellow-50 to-purple-100 p-8 rounded-2xl shadow-xl border-2 border-pink-200 mb-10">
+              <h3 className="text-2xl font-bold mb-6 text-pink-700 flex items-center gap-2">Luật kết hợp</h3>
+              <div className="space-y-3">
                 {responseResult &&
-                  responseResult.association_rules.map((item) => (
-                    <li key={item.rule} className="flex items-center gap-2">
-                      <span className="w-3 h-3 bg-purple-500 rounded-full"></span>
-                      <span className="text-gray-700">{item.rule}</span>
-                    </li>
+                  responseResult.association_rules.map((item, index) => (
+                    <div
+                      key={item.rule}
+                      className="flex items-center gap-3 p-4 bg-white rounded-lg shadow border-l-4 border-pink-400"
+                    >
+                      <span className="text-pink-700 font-bold text-lg">{index + 1}.</span>
+                      <span className="text-gray-900 text-lg">
+                        <strong>{item.rule}</strong>
+                      </span>
+                    </div>
                   ))}
-              </ul>
+              </div>
             </div>
 
             <div className="space-y-8">

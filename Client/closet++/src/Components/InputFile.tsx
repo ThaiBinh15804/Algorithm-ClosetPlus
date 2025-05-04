@@ -10,19 +10,23 @@ interface Props {
   setResponseResult: React.Dispatch<React.SetStateAction<MiningResult | null>>
   file: File | null
   setFile: React.Dispatch<React.SetStateAction<File | null>>
+  excelData: ExcelData | null
+  setExcelData: React.Dispatch<React.SetStateAction<ExcelData | null>>
 }
 
-export default function InputFile({ setResponseResult, file, setFile }: Props) {
+export default function InputFile({ setResponseResult, file, setFile, excelData, setExcelData }: Props) {
   const refInput = useRef<HTMLInputElement>(null)
 
   const handleClickRef = () => {
     refInput.current?.click()
   }
 
-  const handleChangeFile = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const fileChoose = event.target.files?.[0] as File
     if (fileChoose) {
       setFile(fileChoose)
+      const data = await readExcelFiles(fileChoose)
+      setExcelData(data)
     }
   }
 
@@ -79,8 +83,7 @@ export default function InputFile({ setResponseResult, file, setFile }: Props) {
     }
 
     try {
-      const { transactions, min_sup, min_confidence, min_lift } = await readExcelFiles(file)
-
+      const { transactions, min_sup, min_confidence, min_lift } = excelData || await readExcelFiles(file)
       if (!transactions || transactions.length === 0) {
         alert("Không có giao dịch hợp lệ trong file đã chọn!")
         return
@@ -90,20 +93,10 @@ export default function InputFile({ setResponseResult, file, setFile }: Props) {
         return
       }
 
-      const body = {
-        transactions,
-        min_sup,
-        min_confidence,
-        min_lift
-      }
-
-      // Gọi API
+      const body = { transactions, min_sup, min_confidence, min_lift }
       const res = await axios.post("http://localhost:8999/mine", body, {
-        headers: {
-          "Content-Type": "application/json"
-        }
+        headers: { "Content-Type": "application/json" }
       })
-
       setResponseResult(res.data as MiningResult)
     } catch (error: any) {
       console.error("Lỗi:", error)
@@ -113,28 +106,97 @@ export default function InputFile({ setResponseResult, file, setFile }: Props) {
 
   return (
     <form onSubmit={handleSubmitRunClosetPlusFile} className="mt-2">
-      <button className="p-2 px-4 bg-blue-500 rounded-md text-white text-[14px]" type="button" onClick={handleClickRef}>
-        Chọn file
-      </button>
-      <input
-        type="file"
-        className="hidden"
-        multiple
-        accept=".xlsx,.xls"
-        ref={refInput}
-        onClick={(event) => {
-          ;(event.target as any).value = null
-        }}
-        onChange={handleChangeFile}
-      />
-      {file && (
-        <div>
-          <div className="mt-2 text-[13px] text-gray-500">{file.name}</div>
-          <button className="p-2 px-4 bg-blue-500 text-white rounded-md text-[14px] mt-2" type="submit">
-            Chạy thuật toán
-          </button>
+      <div className="mt-4 ">
+        {/* Card chọn file */}
+        <div className="bg-white rounded-xl shadow-md p-6 max-w-xl mb-6 mx-auto">
+          <div className="flex items-center gap-4 mt-4">
+            <button
+              className="py-2 px-5 bg-blue-600 rounded-md text-white text-base font-semibold hover:bg-blue-700 transition flex items-center gap-2"
+              type="button"
+              onClick={handleClickRef}
+            >
+              <span className="text-xl">📁</span>
+              Chọn file Excel
+            </button>
+            <input
+              type="file"
+              className="hidden"
+              multiple
+              accept=".xlsx,.xls"
+              ref={refInput}
+              onClick={(event) => {
+                ;(event.target as any).value = null
+              }}
+              onChange={handleChangeFile}
+            />
+            {file ? (
+              <span className="flex items-center gap-2 text-green-700 bg-green-50 px-3 py-1 rounded text-sm font-medium border border-green-200">
+                <span className="text-lg">✔️</span>
+                {file.name}
+              </span>
+            ) : (
+              <span className="text-gray-400 text-sm italic">Chưa chọn file</span>
+            )}
+          </div>
+          <div className="my-3">
+            <div className="text-gray-500 text-sm">
+              Chọn file Excel (.xlsx, .xls) chứa dữ liệu giao dịch và các tham số min_sup, min_confidence, min_lift.
+            </div>
+          </div>
+          {file && (
+            <div className="flex justify-end mt-6">
+              <button
+                className="py-2 px-5 bg-green-600 rounded-md text-white text-base font-semibold hover:bg-green-700 transition flex items-center gap-2"
+                type="submit"
+              >
+                <span className="text-lg">🚀</span>
+                Chạy thuật toán
+              </button>
+            </div>
+          )}
         </div>
-      )}
+
+        {/* Hiển thị bảng dữ liệu và chỉ số nếu đọc file thành công */}
+        {excelData && (
+          <div className="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto mt-4">
+            <div className="mb-4">
+              <div className="text-lg font-bold text-blue-700 mb-2">Thông số từ file</div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <span className="font-semibold text-blue-700">min_sup:</span> {excelData.min_sup}
+                </div>
+                <div>
+                  <span className="font-semibold text-blue-700">min_confidence:</span> {excelData.min_confidence}
+                </div>
+                <div>
+                  <span className="font-semibold text-blue-700">min_lift:</span> {excelData.min_lift}
+                </div>
+              </div>
+            </div>
+            <div>
+              <div className="text-lg font-bold text-blue-700 mb-2">Danh sách giao dịch</div>
+              <div className="overflow-x-auto rounded-lg border border-gray-200">
+                <table className="min-w-full bg-white">
+                  <thead>
+                    <tr className="bg-blue-50">
+                      <th className="py-2 px-4 text-left text-sm font-semibold text-blue-700">TID</th>
+                      <th className="py-2 px-4 text-left text-sm font-semibold text-blue-700">Danh sách</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {excelData.transactions.map((trans, idx) => (
+                      <tr key={idx} className="border-t border-gray-100">
+                        <td className="py-2 px-4 font-medium">T{idx + 1}</td>
+                        <td className="py-2 px-4">{trans.join(", ")}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </form>
   )
 }
