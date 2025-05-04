@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import axios from "axios"
 import { useRef } from "react"
 import { useForm } from "react-hook-form"
 import { FormDataRun } from "src/App"
 import { ExcelData, MiningResult } from "src/type"
 import * as XLSX from "xlsx"
+import axios from "axios"
 
 interface Props {
   setResponseResult: React.Dispatch<React.SetStateAction<MiningResult | null>>
@@ -74,15 +74,19 @@ export default function InputFile({ setResponseResult, file, setFile }: Props) {
 
   const handleSubmitRunClosetPlusFile = handleSubmitRunCloset2(async () => {
     if (!file) {
-      alert("Vui lòng chọn ít nhất một file Excel!")
+      alert("Vui lòng chọn một file Excel trước khi chạy thuật toán!")
       return
     }
 
     try {
       const { transactions, min_sup, min_confidence, min_lift } = await readExcelFiles(file)
 
-      if (transactions.length === 0) {
-        alert("Không có giao dịch hợp lệ trong các file đã chọn!")
+      if (!transactions || transactions.length === 0) {
+        alert("Không có giao dịch hợp lệ trong file đã chọn!")
+        return
+      }
+      if (!min_sup || !min_confidence || !min_lift) {
+        alert("File thiếu thông tin tham số min_sup, min_confidence hoặc min_lift!")
         return
       }
 
@@ -92,8 +96,6 @@ export default function InputFile({ setResponseResult, file, setFile }: Props) {
         min_confidence,
         min_lift
       }
-
-      console.log("Dữ liệu gửi đi:", body)
 
       // Gọi API
       const res = await axios.post("http://localhost:8999/mine", body, {
@@ -105,13 +107,13 @@ export default function InputFile({ setResponseResult, file, setFile }: Props) {
       setResponseResult(res.data as MiningResult)
     } catch (error: any) {
       console.error("Lỗi:", error)
-      alert("Có lỗi xảy ra: " + (error.message || "Không xác định"))
+      alert("Có lỗi xảy ra khi xử lý file hoặc gửi dữ liệu: " + (error.message || "Không xác định"))
     }
   })
 
   return (
     <form onSubmit={handleSubmitRunClosetPlusFile} className="mt-2">
-      <button className="p-2 px-4 bg-blue-500 rounded-md text-white text-[14px]" onClick={handleClickRef}>
+      <button className="p-2 px-4 bg-blue-500 rounded-md text-white text-[14px]" type="button" onClick={handleClickRef}>
         Chọn file
       </button>
       <input
@@ -128,7 +130,9 @@ export default function InputFile({ setResponseResult, file, setFile }: Props) {
       {file && (
         <div>
           <div className="mt-2 text-[13px] text-gray-500">{file.name}</div>
-          <button className="p-2 px-4 bg-blue-500 text-white rounded-md text-[14px] mt-2">Chạy thuật toán</button>
+          <button className="p-2 px-4 bg-blue-500 text-white rounded-md text-[14px] mt-2" type="submit">
+            Chạy thuật toán
+          </button>
         </div>
       )}
     </form>
