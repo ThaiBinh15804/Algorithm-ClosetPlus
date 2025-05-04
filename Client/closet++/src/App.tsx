@@ -23,7 +23,7 @@ function App() {
       <header className="bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] py-5 shadow-xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <h1 className="text-4xl font-extrabold text-white tracking-tight drop-shadow-lg">
-            Thuật toán CLOSET++<span className="text-yellow-300">.</span>
+            Thuật toán CLOSET+<span className="text-yellow-300">.</span>
           </h1>
         </div>
       </header>
@@ -31,7 +31,7 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <section className="bg-white p-10 rounded-2xl shadow-2xl border-2 border-purple-100">
           <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] text-transparent bg-clip-text drop-shadow">
-            Tìm tập phổ biến đóng với CLOSET++
+            Tìm tập phổ biến đóng với CLOSET+
           </h2>
 
           <div className="flex items-center gap-6 mb-8">
